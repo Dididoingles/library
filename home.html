@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Library · @dicarvalho.prof</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Star canvas -->
+    <canvas id="star-canvas"></canvas>
+
+    <header class="main-header">
+        <div class="header-inner">
+            <a href="#" class="back-link-top" id="back-button">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            <div class="section-eyebrow">Mars Education</div>
+            <h1 class="brand-title">Language library<em></em></h1>
+            <p class="brand-subtitle">@dicarvalho.prof</p>
+
+            <!-- BARRA DE BUSCA -->
+            <div class="search-wrapper">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="search-input" placeholder="Buscar por título, autor ou palavra-chave..." class="search-input">
+                    <button id="search-clear" class="search-clear" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="search-results-info" class="search-results-info"></div>
+            </div>
+        </div>
+    </header>
+
+    <main id="library-container">
+        <div id="loading-message"><span class="loading-dot"></span> Biblioteca Online: Carregando livros...</div>
+        <div id="books-grid"></div>
+    </main>
+
+    <footer class="lib-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">@dicarvalho<span>.</span>prof</div>
+            <p class="footer-copy">© 2025 Diandra Carvalho · Ciência aplicada ao ensino</p>
+            <div class="footer-links">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="https://wa.me/5516993272278"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+    // ── STAR FIELD ──────────────────────────────────────────────
+    const canvas = document.getElementById('star-canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, stars = [];
+    const mouse = { x: -9999, y: -9999 };
+
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = document.body.scrollHeight;
+    }
+
+    class Star {
+        constructor() { this.reset(true); }
+        reset(initial) {
+            this.x    = Math.random() * W;
+            this.y    = initial ? Math.random() * H : Math.random() * H;
+            this.r    = Math.random() * 1.2 + 0.3;
+            this.base = Math.random() * 0.5 + 0.2;
+            this.op   = this.base;
+            this.speed = (Math.random() - 0.5) * 0.08;
+            this.twinkleSpeed = Math.random() * 0.008 + 0.003;
+            this.twinkleOffset = Math.random() * Math.PI * 2;
+            this.warm = Math.random() < 0.15;
+        }
+        update(t) {
+            this.op = this.base + Math.sin(t * this.twinkleSpeed + this.twinkleOffset) * (this.base * 0.6);
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) {
+                this.op = Math.min(1, this.op + (1 - dist/120) * 0.5);
+            }
+            this.x += this.speed;
+            if (this.x < 0)  this.x = W;
+            if (this.x > W)  this.x = 0;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+            const color = this.warm
+                ? `rgba(255,230,180,${this.op})`
+                : `rgba(255,255,255,${this.op})`;
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+    }
+
+    function init() {
+        resize();
+        stars = [];
+        const count = Math.floor((W * H) / 8000);
+        for (let i = 0; i < Math.min(count, 200); i++) stars.push(new Star());
+    }
+
+    let t = 0;
+    function animate() {
+        ctx.clearRect(0, 0, W, H);
+        t++;
+        stars.forEach(s => { s.update(t); s.draw(); });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY + window.scrollY; });
+    window.addEventListener('resize', () => { init(); });
+    const observer = new MutationObserver(() => { resize(); });
+    observer.observe(document.getElementById('books-grid'), { childList: true });
+
+    init();
+    animate();
+
+    // ── BOTÃO VOLTAR ─────────────────────────────────────────────
+    document.getElementById('back-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.history.back();
+    });
+
+    // ── BARRA DE BUSCA ──────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search-input');
+        const searchClear = document.getElementById('search-clear');
+        const resultsInfo = document.getElementById('search-results-info');
+        let allBooks = [];
+        let searchTimeout;
+
+        // Função para obter todos os livros da grid
+        function getAllBooks() {
+            const bookItems = document.querySelectorAll('.book-item');
+            const books = [];
+            bookItems.forEach(item => {
+                const img = item.querySelector('.book-cover');
+                const title = img ? img.alt || '' : '';
+                const category = item.dataset.category || '';
+                const author = item.dataset.author || '';
+                const description = item.dataset.description || '';
+                books.push({
+                    element: item,
+                    title: title.toLowerCase(),
+                    category: category.toLowerCase(),
+                    author: author.toLowerCase(),
+                    description: description.toLowerCase(),
+                    fullText: (title + ' ' + category + ' ' + author + ' ' + description).toLowerCase()
+                });
+            });
+            return books;
+        }
+
+        // Função para realizar a busca
+        function performSearch(query) {
+            const trimmedQuery = query.trim().toLowerCase();
+            
+            if (!trimmedQuery) {
+                // Mostrar todos os livros
+                document.querySelectorAll('.book-item').forEach(item => {
+                    item.style.display = '';
+                });
+                document.querySelectorAll('.book-group').forEach(group => {
+                    group.style.display = '';
+                });
+                resultsInfo.textContent = '';
+                searchClear.style.display = 'none';
+                return;
+            }
+
+            searchClear.style.display = 'block';
+            
+            // Verificar se os livros já foram carregados
+            const bookItems = document.querySelectorAll('.book-item');
+            if (bookItems.length === 0) {
+                resultsInfo.textContent = 'Carregando livros...';
+                return;
+            }
+
+            // Se não tiver cache, criar
+            if (allBooks.length === 0) {
+                allBooks = getAllBooks();
+            }
+
+            const searchTerms = trimmedQuery.split(' ').filter(term => term.length > 0);
+            let matchCount = 0;
+
+            allBooks.forEach(book => {
+                const matches = searchTerms.every(term => 
+                    book.fullText.includes(term) || 
+                    book.title.includes(term) ||
+                    book.category.includes(term) ||
+                    book.author.includes(term)
+                );
+
+                if (matches) {
+                    book.element.style.display = '';
+                    matchCount++;
+                } else {
+                    book.element.style.display = 'none';
+                }
+            });
+
+            // Mostrar/esconder grupos vazios
+            document.querySelectorAll('.book-group').forEach(group => {
+                const visibleItems = group.querySelectorAll('.book-item[style*="display: none"]');
+                const totalItems = group.querySelectorAll('.book-item').length;
+                if (visibleItems.length === totalItems) {
+                    group.style.display = 'none';
+                } else {
+                    group.style.display = '';
+                }
+            });
+
+            // Atualizar contador de resultados
+            if (matchCount > 0) {
+                resultsInfo.textContent = `${matchCount} resultado${matchCount > 1 ? 's' : ''} encontrado${matchCount > 1 ? 's' : ''}`;
+            } else {
+                resultsInfo.textContent = 'Nenhum livro encontrado';
+            }
+        }
+
+        // Evento de input com debounce
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performSearch(this.value);
+            }, 300);
+        });
+
+        // Botão de limpar busca
+        searchClear.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch('');
+            searchInput.focus();
+        });
+
+        // Atualizar cache quando novos livros forem carregados
+        const gridObserver = new MutationObserver(() => {
+            allBooks = getAllBooks();
+        });
+        gridObserver.observe(document.getElementById('books-grid'), { 
+            childList: true,
+            subtree: true 
+        });
+
+        // Tecla ESC para limpar busca
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                performSearch('');
+                this.blur();
+            }
+        });
+    });
+    </script>
+</body>
+</html>

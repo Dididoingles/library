@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Library 2.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Star canvas -->
+    <canvas id="star-canvas"></canvas>
+
+    <header class="main-header">
+        <div class="header-inner">
+            <a href="#" class="back-link-top" id="back-button">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+            <div class="section-eyebrow">@dicarvalho.prof</div>
+            <h1 class="brand-title">Language library<em></em></h1>
+        </div>
+    </header>
+
+    <main class="details-wrapper">
+        <div class="col-left">
+            <img id="book-capa" src="" alt="Capa do Ebook" class="detail-cover">
+        </div>
+
+        <div class="col-right">
+            <span id="book-categoria" class="category-tag">Categoria</span>
+            <h2 id="book-titulo" class="book-title">Carregando título...</h2>
+            <p id="book-descricao" class="book-description">Carregando descrição...</p>
+
+            <p class="license-note">
+                Licença: Material gratuito para uso pessoal e educacional.
+            </p>
+
+            <a id="book-download" href="#" class="download-btn" target="_blank">
+                <i class="fas fa-download"></i> Fazer Download
+            </a>
+
+            <br>
+            <a href="#" class="back-link" id="back-link-details">
+                <i class="fas fa-arrow-left"></i> Voltar para a biblioteca
+            </a>
+        </div>
+    </main>
+
+    <footer class="lib-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">@dicarvalho<span>.</span>prof</div>
+            <p class="footer-copy">© 2025 Diandra Carvalho · Ciência aplicada ao ensino</p>
+            <div class="footer-links">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="https://wa.me/5516993272278"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // ── URL PARAMS ──────────────────────────────────────────────
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has('Título')) {
+        document.getElementById('book-titulo').innerText    = urlParams.get('Título');
+        document.getElementById('book-descricao').innerText = urlParams.get('Descrição');
+        document.getElementById('book-capa').src            = urlParams.get('Capa');
+        document.getElementById('book-categoria').innerText = urlParams.get('Categoria');
+        document.getElementById('book-download').href       = urlParams.get('LinkEbook');
+        document.title = `${urlParams.get('Título')} - Language Library`;
+    } else if (urlParams.has('Titulo')) {
+        document.getElementById('book-titulo').innerText    = urlParams.get('Titulo');
+        document.getElementById('book-descricao').innerText = urlParams.get('Descricao');
+        document.getElementById('book-capa').src            = urlParams.get('Capa');
+        document.getElementById('book-categoria').innerText = urlParams.get('Categoria');
+        document.getElementById('book-download').href       = urlParams.get('LinkEbook');
+    } else {
+        document.getElementById('book-titulo').innerText = "Material não encontrado";
+    }
+
+    // ── BOTÃO VOLTAR ─────────────────────────────────────────────
+    document.getElementById('back-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.history.back();
+    });
+
+    document.getElementById('back-link-details').addEventListener('click', function(e) {
+        e.preventDefault();
+        window.history.back();
+    });
+
+    // ── STAR FIELD ───────────────────────────────────────────────
+    const canvas = document.getElementById('star-canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, stars = [];
+    const mouse = { x: -9999, y: -9999 };
+
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = document.body.scrollHeight;
+    }
+
+    class Star {
+        constructor() { this.reset(true); }
+        reset(initial) {
+            this.x    = Math.random() * W;
+            this.y    = initial ? Math.random() * H : Math.random() * H;
+            this.r    = Math.random() * 1.2 + 0.3;
+            this.base = Math.random() * 0.5 + 0.2;
+            this.op   = this.base;
+            this.speed = (Math.random() - 0.5) * 0.08;
+            this.twinkleSpeed  = Math.random() * 0.008 + 0.003;
+            this.twinkleOffset = Math.random() * Math.PI * 2;
+            this.warm = Math.random() < 0.15;
+        }
+        update(t) {
+            this.op = this.base + Math.sin(t * this.twinkleSpeed + this.twinkleOffset) * (this.base * 0.6);
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) this.op = Math.min(1, this.op + (1 - dist/120) * 0.5);
+            this.x += this.speed;
+            if (this.x < 0) this.x = W;
+            if (this.x > W) this.x = 0;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+            ctx.fillStyle = this.warm
+                ? `rgba(255,230,180,${this.op})`
+                : `rgba(255,255,255,${this.op})`;
+            ctx.fill();
+        }
+    }
+
+    function init() {
+        resize();
+        stars = [];
+        const count = Math.min(Math.floor((W * H) / 8000), 200);
+        for (let i = 0; i < count; i++) stars.push(new Star());
+    }
+
+    let t = 0;
+    function animate() {
+        ctx.clearRect(0, 0, W, H);
+        t++;
+        stars.forEach(s => { s.update(t); s.draw(); });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY + window.scrollY; });
+    window.addEventListener('resize', init);
+    init();
+    animate();
+    </script>
+</body>
+</html>
