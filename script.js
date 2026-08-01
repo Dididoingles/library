@@ -1,17 +1,35 @@
 const API_URL = "https://script.google.com/macros/s/AKfycby3NxWcJZBdiej2WkZSEh2_gLTbaSN6xSM4zoqKFYRklxO5cuiq6JQ-QkNlNBws3sdb/exec";
 
+
 async function loadLibrary() {
-    const grid    = document.getElementById('books-grid');
+    const grid = document.getElementById('books-grid');
     const loading = document.getElementById('loading-message');
+    const spinner = document.getElementById('counter-spinner');
+    const counterNumber = document.getElementById('counter-number');
+    
+    // Mostra o spinner enquanto carrega
+    if (spinner) {
+        spinner.classList.remove('hidden');
+    }
+    
     try {
         const response = await fetch(API_URL);
-        const books    = await response.json();
+        const books = await response.json();
 
-        if (loading) loading.style.display = 'none';
+        if (loading) {
+            loading.style.display = 'none';
+        }
+
+        // Atualiza contador e esconde spinner
+        if (counterNumber) {
+            counterNumber.textContent = books.length;
+        }
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
 
         for (let i = 0; i < books.length; i += 4) {
             const groupData = books.slice(i, i + 4);
-
             const groupDiv = document.createElement('div');
             groupDiv.className = 'book-group';
 
@@ -19,7 +37,6 @@ async function loadLibrary() {
                 const bookDiv = document.createElement('div');
                 bookDiv.className = 'book-item';
                 
-                // Adiciona atributos de dados para busca
                 bookDiv.dataset.title = book.Título || '';
                 bookDiv.dataset.author = book.Autor || '';
                 bookDiv.dataset.category = book.Categoria || '';
@@ -50,11 +67,18 @@ async function loadLibrary() {
             grid.appendChild(groupDiv);
         }
         
-        // Dispara evento para notificar que os livros foram carregados
         document.dispatchEvent(new Event('booksLoaded'));
         
     } catch (e) {
-        if (loading) loading.innerText = "Erro ao carregar materiais.";
+        if (loading) {
+            loading.innerText = "Erro ao carregar materiais.";
+        }
+        if (spinner) {
+            spinner.classList.add('hidden');
+        }
+        if (counterNumber) {
+            counterNumber.textContent = '0';
+        }
     }
 }
 
