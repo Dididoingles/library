@@ -18,20 +18,32 @@
             <a href="#" class="back-link-top" id="back-button">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
-            <div class="section-eyebrow">Mars Education</div>
-            <h1 class="brand-title">Language library<em></em></h1>
-            <p class="brand-subtitle">@dicarvalho.prof</p>
-
-            <!-- BARRA DE BUSCA -->
+            
+            <div class="section-eyebrow">@dicarvalho.prof</div>
+            <h1 class="brand-title">Language library</h1>
+            
             <div class="search-wrapper">
                 <div class="search-container">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="search-input" placeholder="Buscar por título, autor ou palavra-chave..." class="search-input">
+                    <input type="text" id="search-input" placeholder="Buscar por titulo, autor ou palavra-chave..." class="search-input">
                     <button id="search-clear" class="search-clear" style="display: none;">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div id="search-results-info" class="search-results-info"></div>
+            </div>
+            
+            <!-- Botoes abaixo da pesquisa -->
+            <div class="header-actions">
+                <div class="book-counter" id="book-counter">
+                    <span class="counter-spinner" id="counter-spinner"></span>
+                    <span class="counter-number" id="counter-number">0</span>
+                    <span class="counter-label">livros</span>
+                </div>
+                <a href="https://wa.me/5516993272278" target="_blank" class="btn-whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                    Seja aluno
+                </a>
             </div>
         </div>
     </header>
@@ -53,7 +65,10 @@
         </div>
     </footer>
 
+
+    
     <script src="script.js"></script>
+
     <script>
     // ── STAR FIELD ──────────────────────────────────────────────
     const canvas = document.getElementById('star-canvas');
