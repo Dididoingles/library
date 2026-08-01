@@ -44,6 +44,95 @@ a {
     text-decoration: none; 
 }
 
+/* Container dos botoes no topo direito */
+.header-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+}
+
+/* Contador de livros */
+.book-counter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 6px 16px 6px 14px;
+    font-family: var(--sans);
+    font-weight: 300;
+    color: var(--text);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+}
+
+.book-counter:hover {
+    border-color: var(--red);
+    background: rgba(194, 0, 0, 0.06);
+}
+
+.counter-number {
+    color: var(--red);
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.counter-label {
+    color: var(--muted);
+    font-size: 0.7rem;
+}
+
+/* Botao WhatsApp */
+.btn-whatsapp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #25d366;
+    color: #fff;
+    padding: 8px 18px 8px 14px;
+    border-radius: 30px;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-whatsapp i {
+    font-size: 1rem;
+}
+
+.btn-whatsapp:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* Versao apenas com o icone (opcional) */
+.btn-whatsapp-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-whatsapp-icon i {
+    font-size: 1.2rem;
+}
+
 /* ── BACKGROUND SUPER LIMPO ──────────────────────────────────── */
 body {
     background: #0a0a0a;
@@ -62,7 +151,7 @@ body::before {
             90deg,
             transparent,
             transparent 29px,
-            rgba(194, 0, 0, 0.035) 29px,
+            rgba(194, 0, 0, 0.055) 29px,
             rgba(194, 0, 0, 0.035) 30px
         ),
         repeating-linear-gradient(
@@ -70,7 +159,7 @@ body::before {
             transparent,
             transparent 29px,
             rgba(194, 0, 0, 0.025) 29px,
-            rgba(194, 0, 0, 0.025) 30px
+            rgba(194, 0, 0, 0.055) 30px
         );
     background-size: 30px 30px;
 }
@@ -150,6 +239,11 @@ body::before {
     font-weight: 500;
 }
 
+p {
+    /* Enable balanced wrapping */
+    text-wrap: pretty;
+    
+}
 .brand-title {
     font-family: var(--serif);
     font-size: clamp(1.8rem, 5vw, 3rem);
@@ -323,7 +417,7 @@ body::before {
 /* ── BOOK ITEM ───────────────────────────────────────────────── */
 .book-item {
     position: relative;
-    width: 220px;
+    width: 330px;
     min-height: 300px;
     border-radius: 6px;
     overflow: hidden;
@@ -348,25 +442,26 @@ body::before {
     100% { left: 100%; } 
 }
 
-/* overlap: 4 books per shelf, 25% overlap */
-.book-item:nth-child(2) { 
-    margin-left: -55px; 
-    z-index: 2; 
+/* Overlap entre os livros no desktop */
+.book-item:nth-child(2),
+.book-item:nth-child(3),
+.book-item:nth-child(4) {
+    margin-left: -70px;  /* ajusta conforme o tamanho */
 }
-.book-item:nth-child(3) { 
-    margin-left: -55px; 
-    z-index: 3; 
-}
-.book-item:nth-child(4) { 
-    margin-left: -55px; 
-    z-index: 4; 
-}
+
 
 .book-item:hover {
     transform: translateX(-28%) translateY(-6px);
-    z-index: 10;
-    filter: drop-shadow(-8px 12px 24px rgba(0,0,0,0.7));
 }
+
+/* Garante que os livros à direita sempre fiquem na frente */
+.book-item:nth-child(2) { z-index: 2; }
+.book-item:nth-child(3) { z-index: 3; }
+.book-item:nth-child(4) { z-index: 4; }
+
+.book-item:nth-child(2):hover { z-index: 2; }
+.book-item:nth-child(3):hover { z-index: 3; }
+.book-item:nth-child(4):hover { z-index: 4; }
 
 /* ── BOOK COVER ──────────────────────────────────────────────── */
 .book-cover {
@@ -513,6 +608,7 @@ body::before {
     font-weight: 300;
 }
 
+
 .download-btn {
     display: inline-flex;
     align-items: center;
@@ -581,6 +677,24 @@ body::before {
 @media (max-width: 768px) {
     .main-header {
         padding: 2rem 1rem 2rem;
+    }
+
+    .book-title {
+        font-family: var(--serif);
+        font-size: clamp(1.2rem, 4vw, 2.5rem);
+        font-weight: 400;
+        color: var(--text);
+        margin: 0 0 1.2rem 0;
+        line-height: 1.2;
+    }
+    
+    .book-description {
+        font-size: .8rem;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+        color: var(--muted);
+        font-weight: 300;
+        text-wrap: balance;
     }
     
     /* ── LIVROS EM GRADE 2 POR FILEIRA ──────────────────────── */
@@ -712,6 +826,25 @@ body::before {
     }
 }
 
+.counter-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 4px;
+}
+
+.counter-spinner.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 @media (min-width: 769px) and (max-width: 1100px) {
     /* ── TABLET: MANTÉM O OVERLAP MAS REDUZ O TAMANHO ────────── */
     .book-item { 
@@ -804,4 +937,67 @@ body::before {
 
 .book-group:empty {
     display: none;
+}
+
+/* Estilo para o botão de recarga (fallback) */
+.retry-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px 24px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+    background: #e60000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(194,0,0,0.4);
+}
+
+.error {
+    color: var(--red);
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.error i {
+    margin-right: 8px;
+}
+
+.error-detail {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+/* Mobile: abaixo da barra de pesquisa */
+@media (max-width: 768px) {
+    .header-actions {
+        position: static; /* remove o absolute */
+        justify-content: center;
+        margin-top: 12px;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .book-counter {
+        padding: 4px 12px 4px 10px;
+        font-size: 0.7rem;
+    }
+    
+    .btn-whatsapp {
+        padding: 6px 14px 6px 10px;
+        font-size: 0.7rem;
+    }
+    
+    .btn-whatsapp i {
+        font-size: 0.85rem;
+    }
 }
